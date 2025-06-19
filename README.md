@@ -18,4 +18,6 @@ After installing it, you must pull the differents models you want to use. In my 
 - phi4-mini:latest
 - deepseek-coder:6.7b-instruct
 
+## Summary and feedback
 
+For each section, I will try to write a summary of the content and give feedback on the issues I encountered and possible improvements.
