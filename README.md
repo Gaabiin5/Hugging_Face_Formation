@@ -17,6 +17,33 @@ After installing it, you must pull the differents models you want to use. In my 
 - openchat:latest
 - phi4-mini:latest
 - deepseek-coder:6.7b-instruct
+- mistral instruct
+
+### Usefuls commands to remind 
+
+- ollama pull nameofthemodel
+
+ (Pull the model locally so you can use it)
+
+- ollama list 
+
+(To see which models are loaded on the GPU)
+
+- ollama rm nameofthemodel 
+
+(To delete a model from the GPU storage)
+
+- ollama run nameofthemodel 
+
+(To launch the chat in the command window)
+
+- nvitop 
+
+(To verify if Ollama is running on the CPU or GPU)
+
+
+
+
 
 ## Summary and feedback
 

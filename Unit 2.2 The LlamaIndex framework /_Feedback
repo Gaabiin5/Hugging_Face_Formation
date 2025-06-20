@@ -1,0 +1,22 @@
+## 💬 Feedback on Unit 2.2 — LlamaIndex
+
+### 🔄 Switching to Local Models
+- Easier to understand how to replace inference models with local ones.
+- More flexibility in LLM configuration compared to SmolAgents.
+
+
+### ⚠️ Model Compatibility
+- Not all models work well across tasks (e.g. agents, query engines).
+- A compatibility guide would help.
+
+### 💥 Heavy Workflows
+- Agentic workflows are **resource-intensive**, even for simple tasks.
+- High compute usage and latency with multi-agent setups.
+
+
+
+---
+
+## 🔚 Conclusion
+- LlamaIndex is flexible and modular, with better local model support than SmolAgents.
+- Needs lighter workflows and clearer guidance for local usage.
