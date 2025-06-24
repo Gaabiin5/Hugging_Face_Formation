@@ -5,7 +5,7 @@ import requests
 import re
 
 class BasicAgent:
-    def __init__(self, model="llama3:instruct", prompt_filename="system_prompt.txt"):
+    def __init__(self, model="mistral:instruct", prompt_filename="system_prompt.txt"):
         self.model = model
         self.api_url = "http://localhost:11434/api/generate"
 
@@ -34,13 +34,13 @@ class BasicAgent:
 
         response = self._query_ollama(full_prompt)
 
-        print("\n📤 Réponse complète reçue :\n" + response + "\n")
+        # print("\n📤 Réponse complète reçue :\n" + response + "\n")
 
         # Extraire le contenu entre FINAL ANSWER: et fin de ligne
         match = re.search(r"FINAL ANSWER:\s*(.*)", response, re.IGNORECASE)
         if match:
             final_answer = match.group(1).strip()
-            print(f"✅ Réponse extraite : {final_answer}")
+            # print(f"✅ Réponse extraite : {final_answer}")
             return final_answer
         else:
             print("⚠️ Aucune réponse finale trouvée. Réponse brute renvoyée.")
