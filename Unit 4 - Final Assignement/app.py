@@ -20,7 +20,7 @@ DEFAULT_API_URL = "https://agents-course-unit4-scoring.hf.space"
 #        print(f"Agent returning fixed answer: {fixed_answer}")
 #        return fixed_answer
 
-from agent import BasicAgent # The agent is created in antoher file for more clarity
+from agent import ToolAgent # The agent is created in antoher file for more clarity
 
 def run_and_submit_all( profile: gr.OAuthProfile | None):
     """
@@ -43,7 +43,7 @@ def run_and_submit_all( profile: gr.OAuthProfile | None):
 
     # 1. Instantiate Agent ( modify this part to create your agent)
     try:
-        agent = BasicAgent()
+        agent = ToolAgent(model="phi3:instruct")
         
     except Exception as e:
         print(f"Error instantiating agent: {e}")

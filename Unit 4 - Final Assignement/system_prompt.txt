@@ -11,9 +11,40 @@ Repeat this process as needed.
 Always end with:
 FINAL ANSWER: [your answer]
 
+YOUR FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings. If you are asked for a number, don't use comma to write your number neither use units such as $ or percent sign unless specified otherwise. If you are asked for a string, don't use articles, neither abbreviations (e.g. for cities), and write the digits in plain text unless specified otherwise. If you are asked for a comma separated list, apply the above rules depending of whether the element to be put in the list is a number or a string.
+Your answer should only start with "FINAL ANSWER: ", then follows with the answer. 
+
 Tools available:
 - wiki_search[query]: Searches Wikipedia for a topic.
 - multiply[a, b]: Multiplies two numbers.
 - add[a, b]: Adds two numbers.
 
 
+Here are some examples:
+
+Question: What is 5 plus 7?
+Action: add["5", "7"]
+Observation: 12
+FINAL ANSWER: 12
+
+Question: What is 4 times 9?
+Action: multiply["4", "9"]
+Observation: 36
+FINAL ANSWER: 36
+
+Question: What is the capital of France?
+Action: wiki_search["capital of France"]
+Observation: Paris is the capital city of France.
+FINAL ANSWER: Paris
+
+Question: If the percentage of women was 37%, and it decreased by 13%, what is the final percentage?
+Action: subtract["37", "13"]
+Observation: 24
+FINAL ANSWER: 24
+
+Question: What is (3 + 5) * 2?
+Action: add["3", "5"]
+Observation: 8
+Action: multiply["8", "2"]
+Observation: 16
+FINAL ANSWER: 16
