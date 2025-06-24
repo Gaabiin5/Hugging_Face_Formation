@@ -4,6 +4,9 @@ import math
 import operator
 import wikipedia
 from langchain_community.document_loaders import WikipediaLoader
+from duckduckgo_search import DDGS
+from llm_utils import ollama_chat_completion
+
 
 import re
 
@@ -22,72 +25,82 @@ def tool(func: Callable) -> Callable:
 # --- Définition des outils disponibles ---
 
 @tool
-def multiply(a: int, b: int) -> int:
-    """Multiply two numbers.
-    Args:
-        a: first int
-        b: second int
-    """
-    return a * b
+def add(a: str, b: str) -> int:
+    return int(a) + int(b)
 
 @tool
-def add(a: int, b: int) -> int:
-    """Add two numbers.
-    
-    Args:
-        a: first int
-        b: second int
-    """
-    return a + b
-
-def subtract(a: int, b: int) -> int:
-    """Subtract two numbers.
-    
-    Args:
-        a: first int
-        b: second int
-    """
-    return a - b
+def multiply(a: str, b: str) -> int:
+    return int(a) * int(b)
 
 @tool
-def divide(a: int, b: int) -> int:
-    """Divide two numbers.
-    
-    Args:
-        a: first int
-        b: second int
-    """
+def subtract(a: str, b: str) -> int:
+    return int(a) - int(b)
+
+@tool
+def divide(a: str, b: str) -> float:
+    b = int(b)
     if b == 0:
         raise ValueError("Cannot divide by zero.")
-    return a / b
+    return int(a) / b
 
 @tool
-def modulus(a: int, b: int) -> int:
-    """Get the modulus of two numbers.
-    
-    Args:
-        a: first int
-        b: second int
-    """
-    return a % b
+def modulus(a: str, b: str) -> int:
+    return int(a) % int(b)
 
 @tool
 def wiki_search(query: str) -> str:
-    """Search Wikipedia for a query and return maximum 2 results.
+    """
+    Searches Wikipedia and returns a concise summary (max 2 sentences).
+    """
+    try:
+        # Optionally, set language if needed
+        wikipedia.set_lang("en")
+
+        summary = wikipedia.summary(query, sentences=2)
+        return summary
+    except wikipedia.exceptions.DisambiguationError as e:
+        return f"DisambiguationError: Try a more specific term. Suggestions: {e.options[:3]}"
+    except wikipedia.exceptions.PageError:
+        return "No page found for the query."
+    except Exception as e:
+        return f"Error: {str(e)}"
     
-    Args:
-        query: The search query."""
-    search_docs = WikipediaLoader(query=query, load_max_docs=2).load()
-    formatted_search_docs = "\n\n---\n\n".join(
-        [
-            f'<Document source="{doc.metadata["source"]}" page="{doc.metadata.get("page", "")}"/>\n{doc.page_content}\n</Document>'
-            for doc in search_docs
-        ])
-    return {"wiki_results": formatted_search_docs}
+
+@tool
+def web_search(query: str) -> str:
+    """
+    Searches the web via DuckDuckGo and returns the most relevant snippet.
+    """
+    try:
+        with DDGS() as ddgs:
+            results = ddgs.text(query, max_results=1)
+            first = results[0] if results else None
+            if first and "body" in first:
+                return first["body"]
+            elif first and "snippet" in first:
+                return first["snippet"]
+            else:
+                return "No relevant result found."
+    except Exception as e:
+        return f"Error in web_search: {e}"
+    
+@tool
+def extract_answer(text: str, question: str) -> str:
+    """
+    Extract the best short answer to the question from the given context using the local LLM.
+    """
+    return ollama_chat_completion(
+        system="You are a precise QA assistant. Answer with as few words as possible.",
+        messages=[{"role": "user", "content": f"Context:\n{text}\n\nQuestion: {question}\nAnswer:"}]
+    )
+
+
 
 # --- Exécuteur d'actions ---
 
 
+
+import re
 
 class ToolExecutor:
     """
@@ -97,15 +110,24 @@ class ToolExecutor:
     """
 
     @staticmethod
+    def is_unsatisfactory(text: str) -> bool:
+        """
+        Détermine si le résultat est insuffisant pour être exploitable.
+        """
+        if not text or len(text.strip()) < 10:
+            return True
+        text = text.lower()
+        return any(bad in text for bad in ["no result", "not found", "unable", "could not", "empty", "none"])
+
+    @staticmethod
     def execute(tool_call: str) -> str:
         """
         Parse et exécute une commande Action de type :
         Action: tool_name["arg1", "arg2"]
 
-        Retourne une chaîne de type :
-        Observation: [résultat ou message d'erreur]
+        Si l'outil principal échoue ou donne une réponse non satisfaisante, 
+        bascule automatiquement sur un outil de fallback (ex. web_search).
         """
-        from . import REGISTERED_TOOLS  # Import depuis le registre global (défini en haut de tools.py)
 
         match = re.match(r'Action:\s*([a-zA-Z_][a-zA-Z0-9_]*)\[(.*)\]', tool_call.strip())
         if not match:
@@ -114,7 +136,6 @@ class ToolExecutor:
         tool_name, args_string = match.groups()
 
         try:
-            # Nettoyer les arguments
             args = [arg.strip().strip('"').strip("'") for arg in args_string.split(',') if arg.strip()]
         except Exception as e:
             return f"Observation: Argument parsing error: {e}"
@@ -125,6 +146,17 @@ class ToolExecutor:
 
         try:
             result = tool_fn(*args)
+
+            # ✅ Si le résultat est insatisfaisant, fallback sur web_search
+            if tool_name == "wiki_search" and "web_search" in REGISTERED_TOOLS and ToolExecutor.is_unsatisfactory(str(result)):
+                try:
+                    fallback_fn = REGISTERED_TOOLS["web_search"]
+                    fallback_result = fallback_fn(*args)
+                    return f"Observation: {fallback_result}"
+                except Exception as e:
+                    return f"Observation: Fallback error: {e}"
+
             return f"Observation: {result}"
+
         except Exception as e:
             return f"Observation: Execution error: {e}"
