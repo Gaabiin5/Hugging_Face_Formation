@@ -9,46 +9,13 @@ from tools import ToolExecutor  # Your tool registry and executor
 # --- BasicAgent ---
 
 class BasicAgent:
-    def __init__(self, model="mistral:instruct", prompt_filename="system_prompt.txt"):
-        self.model = model
-        self.api_url = "http://localhost:11434/api/generate"
-
-        # Construire le chemin absolu depuis le fichier agent.py
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(base_dir, prompt_filename)
-
-        with open(prompt_path, "r", encoding="utf-8") as f:
-            self.system_prompt = f.read()
-
-    def _query_ollama(self, prompt: str) -> str:
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False
-        }
-        response = requests.post(self.api_url, json=payload)
-        response.raise_for_status()
-        return response.json()["response"].strip()
-
-
-
+    def __init__(self):
+       print("BasicAgent initialized.")
     def __call__(self, question: str) -> str:
-        full_prompt = self.system_prompt.strip() + "\n\nQuestion: " + question + "\nAnswer:"
-        print("\n📨 Prompt envoyé à Ollama :\n" + full_prompt + "\n")
-
-        response = self._query_ollama(full_prompt)
-
-        # print("\n📤 Réponse complète reçue :\n" + response + "\n")
-
-        # Extraire le contenu entre FINAL ANSWER: et fin de ligne
-        match = re.search(r"FINAL ANSWER:\s*(.*)", response, re.IGNORECASE)
-        if match:
-            final_answer = match.group(1).strip()
-            # print(f"✅ Réponse extraite : {final_answer}")
-            return final_answer
-        else:
-            print("⚠️ Aucune réponse finale trouvée. Réponse brute renvoyée.")
-            return response.strip()
+        print(f"Agent received question (first 50 chars): {question[:50]}...")
+        fixed_answer = "This is a default answer."
+        print(f"Agent returning fixed answer: {fixed_answer}")
+        return fixed_answer
 
 # --- ToolAgent ---
 
@@ -91,7 +58,7 @@ class ToolAgent:
         match = re.search(r"FINAL ANSWER:\s*(.*)", text, re.IGNORECASE)
         return match.group(1).strip() if match else None
 
-    def __call__(self, question: str, log: bool = False) -> str | dict:
+    def __call__(self, question: str, log: bool = False, max_steps : int = 10) -> str | dict:
         """
         Main agent loop with optional logging.
 
@@ -117,7 +84,7 @@ class ToolAgent:
 
         self.used_tools = []  # reset for this question
 
-        for step in range(8):
+        for step in range(max_steps):
             response = self.query_ollama(history)
             if log:
                 trace += f"\n📤 Model response (step {step+1}):\n{response}\n"
@@ -158,10 +125,11 @@ class ToolAgent:
 
         if log:
             return {
-                "final_answer": "FINAL ANSWER not found after 8 steps.",
+                "final_answer": f"FINAL ANSWER not found after {max_steps} steps.",
                 "used_tools": self.used_tools,
                 "trace": trace.strip()
             }
-        return "FINAL ANSWER not found after 8 steps."
+        return f"FINAL ANSWER not found after {max_steps} steps."
+
 
 
