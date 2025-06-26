@@ -1,0 +1,29 @@
+gradio
+requests
+
+# --- Core LLM + API ---
+google-generativeai==0.3.2
+
+# --- Outils mathématiques / logiques ---
+wikipedia
+duckduckgo-search
+langchain-community==0.0.30
+
+# --- Traitement de documents ---
+pymupdf  # ⚠️ Ne pas confondre avec "fitz"
+pillow
+pytesseract
+pandas
+
+# --- Interface utilisateur Gradio (si nécessaire en local) ---
+gradio
+
+# --- Vision (pour OCR image vers texte) ---
+opencv-python-headless  # Optionnel : traitement image avant OCR
+
+# --- Sécurité / gestion erreurs API ---
+google-api-core
+
+# --- Pour notebook / tests ---
+notebook
+ipykernel

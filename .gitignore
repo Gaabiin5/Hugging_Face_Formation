@@ -12,3 +12,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+
+# 
+.GAIA/
+GAIA/
