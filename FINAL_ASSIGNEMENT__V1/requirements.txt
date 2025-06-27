@@ -1,0 +1,63 @@
+# #########################################
+#              Requirement files          #   
+# ______________________________________  #
+#                                         #
+#               HOW TO USE IT ?           #
+#               ______________            #
+#                                         #
+#       Just run the following command    #
+#       in your project environnement     #
+#               ______________            #
+#                                         #
+#      pip install -r requirements.txt    #
+#               ______________            #
+#                                         #
+# It will install all the packages needed #
+#                                         #
+# #########################################
+
+
+
+
+# UI Framework
+gradio==5.25.2
+
+# HTTP Requests
+requests
+
+# Environment Variables
+python-dotenv
+
+# Data Handling
+pandas
+
+# Langchain & LangGraph
+langchain
+langgraph
+langchain-core
+
+# LLM Providers
+langchain-google-genai
+langchain-groq
+langchain-huggingface
+
+# Community Integrations
+langchain-community
+
+# Embeddings
+sentence-transformers
+
+# Supabase Client
+supabase
+
+# Document Loaders
+arxiv
+wikipedia
+
+# HuggingFace API
+huggingface_hub
+
+
+# Notebook
+notebook  
+ipykernel
