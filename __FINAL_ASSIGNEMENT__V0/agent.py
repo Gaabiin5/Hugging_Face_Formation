@@ -17,21 +17,62 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.tools import tool
 from langchain.tools.retriever import create_retriever_tool
 from supabase.client import Client, create_client
+import re
 
 load_dotenv()
+
+
+from tools import tools, vector_store
+
 
 
 # --- BasicAgent ---
 
 class BasicAgent:
-    def __init__(self):
-       print("BasicAgent initialized.")
-    def __call__(self, question: str) -> str:
-        print(f"Agent received question (first 50 chars): {question[:50]}...")
-        fixed_answer = "This is a default answer."
-        print(f"Agent returning fixed answer: {fixed_answer}")
-        return fixed_answer
+    """A langgraph agent."""
+    def __init__(self,provider: str = "groq"):
+        print("BasicAgent initialized.")
+        self.graph = build_graph(provider=provider)
 
+    def extract_final_answer(self, text):
+        match = re.search(r"final answer\s*[:\-]?\s*(.*)", text, flags=re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return text.strip()
+
+    def __call__(self, question: str, log=False):
+        messages = [HumanMessage(content=question)]
+        result = self.graph.invoke({"messages": messages})
+
+        all_messages = result["messages"]
+        raw_answer = all_messages[-1].content
+        final_answer = self.extract_final_answer(raw_answer)
+
+        if log:
+            trace = "\n".join([f"{m.type.upper()}: {m.content}" for m in all_messages])
+            tools_used = [m.tool for m in all_messages if hasattr(m, "tool")]
+            return {
+                "final_answer": final_answer,
+                "used_tools": bool(tools_used),
+                "tools_used": tools_used,
+                "trace": trace,
+            }
+
+        return final_answer
+    
+
+
+#Load the system_prompt
+
+base_dir = os.path.dirname(__file__)
+prompt_path = os.path.join(base_dir, "system_prompt.txt")
+
+with open(prompt_path, "r", encoding="utf-8") as f:
+    system_prompt = f.read()
+
+
+# System message
+sys_msg = SystemMessage(content=system_prompt)
 
 
 # --- Construction du graphe 

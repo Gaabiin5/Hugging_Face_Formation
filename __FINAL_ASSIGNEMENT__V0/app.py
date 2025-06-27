@@ -9,7 +9,7 @@ import pandas as pd
 DEFAULT_API_URL = "https://agents-course-unit4-scoring.hf.space"
 
 
-from agent import ToolAgent # The agent is created in antoher file for more clarity
+from agent import BasicAgent # The agent is created in antoher file for more clarity
 
 def run_and_submit_all( profile: gr.OAuthProfile | None):
     """
@@ -32,8 +32,7 @@ def run_and_submit_all( profile: gr.OAuthProfile | None):
 
     # 1. Instantiate Agent ( modify this part to create your agent)
     try:
-
-        agent = ToolAgent(model="models/gemini-2.0-flash-lite")
+        agent = BasicAgent(provider="groq")
         
     except Exception as e:
         print(f"Error instantiating agent: {e}")
