@@ -1,0 +1,1 @@
+    Il faut beaucoup de RAM pour lancer le calcul sur GPU. Je n'ai pas pu le lancer directement.
